@@ -19,8 +19,8 @@ file_num = 0                            # Starting point for filename
 file_suffix = ".bmp"                    # Extension for image file
 countdown = 3                           # Seconds to count down from
 countdown_delay = 1000                  # Milliseconds
-width = 160                             # Width of frame (pixels)
-height = 160                            # Height of frame (pixels)
+width = 96                              # Width of frame (pixels)
+height = 96                             # Height of frame (pixels)
 
 ####################################################################################################
 # Functions
@@ -59,6 +59,7 @@ def get_filepath():
 # Configure camera
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)     # Set pixel format to RGB565 or GRAYSCALE
+#sensor.set_pixformat(sensor.GRAYSCALE) # Portenta supports only grayscale images
 sensor.set_framesize(sensor.QVGA)       # Set frame size to QVGA (320x240)
 sensor.set_windowing((width, height))   # Crop sensor frame to this resolution
 sensor.skip_frames(time = 2000)         # Let the camera adjust
