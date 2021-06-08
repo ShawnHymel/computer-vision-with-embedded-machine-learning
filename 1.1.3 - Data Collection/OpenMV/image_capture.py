@@ -21,6 +21,7 @@ countdown = 3                           # Seconds to count down from
 countdown_delay = 1000                  # Milliseconds
 width = 96                              # Width of frame (pixels)
 height = 96                             # Height of frame (pixels)
+pixel_format = sensor.RGB565            # sensor.GRAYSCALE or sensor.RGB565
 
 ####################################################################################################
 # Functions
@@ -58,8 +59,7 @@ def get_filepath():
 
 # Configure camera
 sensor.reset()
-sensor.set_pixformat(sensor.RGB565)     # Set pixel format to RGB565 or GRAYSCALE
-#sensor.set_pixformat(sensor.GRAYSCALE) # Portenta supports only grayscale images
+sensor.set_pixformat(pixel_format)      # Set pixel format to RGB565 or GRAYSCALE
 sensor.set_framesize(sensor.QVGA)       # Set frame size to QVGA (320x240)
 sensor.set_windowing((width, height))   # Crop sensor frame to this resolution
 sensor.skip_frames(time = 2000)         # Let the camera adjust

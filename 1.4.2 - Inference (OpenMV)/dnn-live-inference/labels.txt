@@ -1,0 +1,5 @@
+background
+capacitor
+diode
+led
+resistor
