@@ -14,8 +14,8 @@ import sensor, image, time, tf
 # Settings
 model_file = "trained.tflite"           # Location of TFLite model file
 labels_file = "labels.txt"              # Location of labels file
-width = 96                              # Width of frame (pixels)
-height = 96                             # Height of frame (pixels)
+width = 28                              # Width of frame (pixels)
+height = 28                             # Height of frame (pixels)
 pixel_format = sensor.GRAYSCALE         # This model only supports grayscale
 
 # Configure camera
@@ -26,10 +26,13 @@ sensor.set_windowing((width, height))   # Crop sensor frame to this resolution
 sensor.skip_frames(time = 2000)         # Let the camera adjust
 
 # Extract labels from labels file
-labels = [line.rstrip('\n') for line in open(labels_file)]
+labels = [line.rstrip('\n').rstrip('\r') for line in open(labels_file)]
 
 # Start clock (for measureing FPS)
 clock = time.clock()
+
+# Create blank image (OpenMV tf library expects image object as input)
+img_flat = image.Image((width * height), 1, sensor.GRAYSCALE)
 
 # Main while loop
 inference_count = 0
@@ -41,8 +44,13 @@ while(True):
     # Get image from camera
     img = sensor.snapshot()
 
+    # Fill flat image buffer with our image data
+    for y in range(height):
+        for x in range(width):
+            img_flat.set_pixel((y * width) + x, 0, img.get_pixel(x, y))
+
     # Do inference. OpenMV tf classify returns a list of prediction objects.
-    objs = tf.classify(model_file, img)
+    objs = tf.classify(model_file, img_flat)
 
     # We should only get one item in the predictions list, so we extract the
     # output probabilities from that.
