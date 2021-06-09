@@ -24,7 +24,7 @@ print()
 print("---Static Features Inference Test---")
 
 # Extract labels from labels file
-labels = [line.rstrip('\n') for line in open(labels_file)]
+labels = [line.rstrip('\n').rstrip('\r') for line in open(labels_file)]
 print("Labels:", labels)
 
 # Create blank image (OpenMV tf library expects image object as input)
