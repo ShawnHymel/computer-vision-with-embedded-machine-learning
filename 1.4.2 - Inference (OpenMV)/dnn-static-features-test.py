@@ -42,7 +42,7 @@ for i, s in enumerate(features):
         pixel_val = 255
 
     # Set pixel values in image container
-    img.set_pixel(i, 0, int(s * 255))
+    img.set_pixel(i, 0, int(pixel_val))
 
 # Run inference. OpenMV tf classify returns a list of prediction objects. Time
 # how long it takes to perform inference.
