@@ -27,7 +27,7 @@ res_height = 480                        # Resolution of camera (height)
 img_width = 96                          # Width of image to capture
 img_height = 96                         # Height of image to capture
 
-####################################################################################################
+################################################################################
 # Functions
 
 def file_exists(filepath):
@@ -58,7 +58,7 @@ def get_filepath():
 
     return filepath
 
-####################################################################################################
+################################################################################
 # Main
 
 # Figure out the name of the output image filename
