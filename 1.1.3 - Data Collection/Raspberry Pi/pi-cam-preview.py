@@ -6,7 +6,7 @@ Capture frame from Pi Camera and display it to the screen using OpenCV (cv2).
 Also display the framerate (fps) to the screen. Use this to adjust the camera's
 focus. Press ctrl + c in the console or 'q' on the preview window to stop.
 
-Based on tutorial from Adrian Rosebrock:
+Based on the tutorial from Adrian Rosebrock:
 https://www.pyimagesearch.com/2015/03/30/accessing-the-raspberry-pi-camera-with-opencv-and-python/
 
 Author: EdgeImpulse, Inc.
