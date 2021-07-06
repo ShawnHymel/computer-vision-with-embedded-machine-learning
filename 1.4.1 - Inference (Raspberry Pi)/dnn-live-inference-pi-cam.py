@@ -1,28 +1,29 @@
 #!/usr/bin/env python
 """
-Live Object Detection (Pi Camera)
+Raspberry Pi Live Image Inference
 
-Detects objects in continuous stream of images from Pi Camera. Use Edge Impulse
-Runner and downloaded .eim model file to perform inference. Bounding box info is
-drawn on top of detected objects along with framerate (FPS) in top-left corner.
+Continuously captures image from Raspberry Pi Camera module and perform 
+inference using provided .eim model file. Outputs probabilities in console.
 
 Author: EdgeImpulse, Inc.
-Date: July 5, 2021
+Date: June 8, 2021
 License: Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 """
 
 import os, sys, time
 import cv2
+import numpy as np
 from picamera import PiCamera
 from picamera.array import PiRGBArray
-from edge_impulse_linux.image import ImageImpulseRunner
+from edge_impulse_linux.runner import ImpulseRunner
 
 # Settings
-model_file = "modelfile.eim"             # Trained ML model from Edge Impulse
-res_width = 320                          # Resolution of camera (width)
-res_height = 320                         # Resolution of camera (height)
-cam_iso = 800                            # 100 for sunlight, 400+ for indoors
-cam_shutter = 500000                     # 100ms exposure time
+model_file = "modelfile.eim"            # Trained ML model from Edge Impulse
+draw_fps = True                         # Draw FPS on screen
+res_width = 96                          # Resolution of camera (width)
+res_height = 96                         # Resolution of camera (height)
+img_width = 28                          # Resize width to this for inference
+img_height = 28                         # Resize height to this for inference
 
 # The ImpulseRunner module will attempt to load files relative to its location,
 # so we make it load files relative to this program instead
@@ -30,10 +31,12 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 model_path = os.path.join(dir_path, model_file)
 
 # Load the model file
-runner = ImageImpulseRunner(model_path)
+runner = ImpulseRunner(model_path)
 
-# Initialize model (and print information if it loads)
+# Initialize model
 try:
+
+    # Print model information
     model_info = runner.init()
     print("Model name:", model_info['project']['name'])
     print("Model owner:", model_info['project']['owner'])
@@ -45,7 +48,7 @@ except Exception as e:
     if (runner):
             runner.stop()
     sys.exit(1)
-
+    
 # Initial framerate value
 fps = 0
 
@@ -55,9 +58,9 @@ with PiCamera() as camera:
     # Configure camera settings
     camera.resolution = (res_width, res_height)
     
-     # Container for our frames
+    # Container for our frames
     raw_capture = PiRGBArray(camera, size=(res_width, res_height))
-
+    
     # Continuously capture frames (this is our while loop)
     for frame in camera.capture_continuous(raw_capture, 
                                             format='bgr', 
@@ -69,8 +72,17 @@ with PiCamera() as camera:
         # Get Numpy array that represents the image
         img = frame.array
         
-        # Encapsulate raw image values into array for model input
-        features, cropped = runner.get_features_from_image(img)
+        # Resize captured image
+        img_resize = cv2.resize(img, (img_width, img_height))
+        
+        # Convert image to grayscale
+        img_resize = cv2.cvtColor(img_resize, cv2.COLOR_BGR2GRAY)
+        
+        # Convert image to 1D vector of floating point numbers
+        features = np.reshape(img_resize, (img_width * img_height)) / 255
+        
+        # Edge Impulse model expects features in list format
+        features = features.tolist()
         
         # Perform inference
         res = None
@@ -83,38 +95,42 @@ with PiCamera() as camera:
         # Display predictions and timing data
         print("Output:", res)
         
-        # Go through each of the returned bounding boxes
-        bboxes = res['result']['bounding_boxes']
-        for bbox in bboxes:
+        # Display prediction on preview
+        if res is not None:
         
-            # Calculate corners of bounding box so we can draw it
-            b_x0 = bbox['x']
-            b_y0 = bbox['y']
-            b_x1 = bbox['x'] + bbox['width']
-            b_y1 = bbox['y'] + bbox['height']
-            
-            # Draw bounding box over detected object
-            cv2.rectangle(img,
-                            (b_x0, b_y0),
-                            (b_x1, b_y1),
-                            (255, 255, 255),
-                            1)
-                            
-            # Draw object and score in bounding box corner
+            # Find label with the highest probability
+            predictions = res['result']['classification']
+            max_label = ""
+            max_val = 0
+            for p in predictions:
+                if predictions[p] > max_val:
+                    max_val = predictions[p]
+                    max_label = p
+                    
+            # Draw predicted label on bottom of preview
             cv2.putText(img,
-                        bbox['label'] + ": " + str(round(bbox['value'], 2)),
-                        (b_x0, b_y0 + 12),
+                        max_label,
+                        (0, res_height - 20),
+                        cv2.FONT_HERSHEY_PLAIN,
+                        1,
+                        (255, 255, 255))
+                        
+            # Draw predicted class's confidence score (probability)
+            cv2.putText(img,
+                        str(round(max_val, 2)),
+                        (0, res_height - 2),
                         cv2.FONT_HERSHEY_PLAIN,
                         1,
                         (255, 255, 255))
         
         # Draw framerate on frame
-        cv2.putText(img, 
-                    "FPS: " + str(round(fps, 2)), 
-                    (0, 12),
-                    cv2.FONT_HERSHEY_PLAIN,
-                    1,
-                    (255, 255, 255))
+        if draw_fps:
+            cv2.putText(img, 
+                        "FPS: " + str(round(fps, 2)), 
+                        (0, 12),
+                        cv2.FONT_HERSHEY_PLAIN,
+                        1,
+                        (255, 255, 255))
         
         # Show the frame
         cv2.imshow("Frame", img)
@@ -129,3 +145,6 @@ with PiCamera() as camera:
         # Press 'q' to quit
         if cv2.waitKey(1) == ord('q'):
             break
+            
+# Clean up
+cv2.destroyAllWindows()
