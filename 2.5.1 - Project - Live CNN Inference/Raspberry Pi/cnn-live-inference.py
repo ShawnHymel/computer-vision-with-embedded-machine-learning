@@ -87,7 +87,7 @@ with PiCamera() as camera:
         for label in results:
             prob = results[label]
             print(label + ": " + str(round(prob, 3)))
-        print("FPS: " + str(round(fps, 2)))
+        print("FPS: " + str(round(fps, 3)))
         
         # Find label with the highest probability
         max_label = max(results, key=results.get)
@@ -102,7 +102,7 @@ with PiCamera() as camera:
                     
         # Draw max probability on preview window
         cv2.putText(img,
-                    str(round(results[label], 2)),
+                    str(round(results[max_label], 2)),
                     (0, 24),
                     cv2.FONT_HERSHEY_PLAIN,
                     1,
