@@ -1,5 +1,5 @@
 """
-OpenMV Live Image Inference
+Raspberry Pi CNN Live Image Classification
 
 Continuously captures images and performs image using provided TFLite model
 file. Outputs probabilities in console.
@@ -14,8 +14,8 @@ import sensor, image, time, tf
 # Settings
 model_file = "trained.tflite"           # Location of TFLite model file
 labels_file = "labels.txt"              # Location of labels file
-width = 28                              # Width of frame (pixels)
-height = 28                             # Height of frame (pixels)
+width = 48                              # Width of frame (pixels)
+height = 48                             # Height of frame (pixels)
 pixel_format = sensor.GRAYSCALE         # This model only supports grayscale
 
 # Configure camera

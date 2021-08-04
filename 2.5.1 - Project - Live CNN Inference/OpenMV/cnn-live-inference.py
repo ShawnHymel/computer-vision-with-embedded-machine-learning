@@ -65,5 +65,5 @@ while(True):
         for i, label in enumerate(labels):
             print(str(label) + ": " + str(predictions[i]))
 
-    # Uncomment this if you want to see FPS measurement
-    print("FPS:", clock.fps())
+        # Uncomment this if you want to see FPS measurement
+        print("FPS:", clock.fps())
