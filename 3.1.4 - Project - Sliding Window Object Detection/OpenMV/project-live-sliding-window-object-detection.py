@@ -1,5 +1,5 @@
 """
-Solution: OpenMV Sliding Window Object Detection
+Project: OpenMV Sliding Window Object Detection
 
 Continuously captures images and performs inference on a sliding window to detect objects.
 
