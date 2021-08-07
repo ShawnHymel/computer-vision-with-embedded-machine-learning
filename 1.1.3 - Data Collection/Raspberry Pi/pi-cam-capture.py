@@ -17,6 +17,7 @@ from picamera.array import PiRGBArray
 # Settings
 res_width = 96                          # Resolution of camera (width)
 res_height = 96                         # Resolution of camera (height)
+rotation = 0                            # Camera rotation (0, 90, 180, or 270)
 draw_fps = False                        # Draw FPS on screen
 save_path = "./"                        # Save images to current directory
 file_num = 0                            # Starting point for filename
@@ -69,6 +70,7 @@ with PiCamera() as camera:
 
     # Configure camera settings
     camera.resolution = (res_width, res_height)
+    camera.rotation = rotation
     
     # Container for our frames
     raw_capture = PiRGBArray(camera, size=(res_width, res_height))

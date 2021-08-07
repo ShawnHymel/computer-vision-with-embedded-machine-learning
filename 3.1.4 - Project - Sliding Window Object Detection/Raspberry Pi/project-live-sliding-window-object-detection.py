@@ -22,6 +22,7 @@ target_label = "dog"                    # Which label we're looking for
 target_threshold = 0.6                  # Draw box if output prob. >= this value
 cam_width = 320                         # Width of frame (pixels)
 cam_height = 240                        # Height of frame (pixels)
+rotation = 0                            # Camera rotation (0, 90, 180, or 270)
 window_width = 96                       # Window width (input to CNN)
 window_height = 96                      # Window height (input to CNN)
 stride = 24                             # How many pixels to move the window
@@ -62,6 +63,7 @@ with PiCamera() as camera:
     
     # Configure camera settings
     camera.resolution = (cam_width, cam_height)
+    camera.rotation = rotation
     
     # Container for our frames
     raw_capture = PiRGBArray(camera, size=(cam_width, cam_height))

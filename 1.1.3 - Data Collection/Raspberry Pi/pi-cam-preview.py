@@ -21,6 +21,7 @@ from picamera.array import PiRGBArray
 # Settings
 res_width = 320                         # Resolution of camera (width)
 res_height = 320                        # Resolution of camera (height)
+rotation = 0                            # Camera rotation (0, 90, 180, or 270)
 
 # Initial framerate value
 fps = 0
@@ -30,6 +31,7 @@ with PiCamera() as camera:
 
     # Configure camera settings
     camera.resolution = (res_width, res_height)
+    camera.rotation = rotation
     
     # Container for our frames
     raw_capture = PiRGBArray(camera, size=(res_width, res_height))
