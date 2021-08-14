@@ -1,6 +1,6 @@
 # Computer Vision with Embedded Machine Learning
 
-[image]
+![Object detection on Raspberry Pi](https://raw.githubusercontent.com/ShawnHymel/computer-vision-with-embedded-machine-learning/master/Images/object-detection.png)
 
 This repository contains all of the code for the demonstrations, project prompts, and project solutions for the [Computer Vision with Embedded Machine Learning](https://www.coursera.org/learn/computer-vision-with-embedded-machine-learning) course. If you have not done so already, I highly recommend taking the [Introduction to Embedded Machine Learning](https://www.coursera.org/learn/introduction-to-embedded-machine-learning) course first, as it covers many important concepts required for the computer vision course.
 
@@ -21,7 +21,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
