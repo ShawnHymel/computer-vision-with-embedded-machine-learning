@@ -69,8 +69,9 @@ with PiCamera() as camera:
         # Get Numpy array that represents the image
         img = frame.array
         
-        # Encapsulate raw image values into array for model input
-        features, cropped = runner.get_features_from_image(img)
+        # Convert to RGB and encapsulate raw values into array for model input
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        features, cropped = runner.get_features_from_image(img_rgb)
         
         # Perform inference
         res = None
