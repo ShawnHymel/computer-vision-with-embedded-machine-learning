@@ -103,7 +103,8 @@ with PiCamera() as camera:
         # Draw countdown on screen
         cv2.putText(img,
                     str(countdown),
-                    (round(res_width / 2) - 5, round(res_height / 2)),
+                    (int(round(res_width / 2) - 5),
+                        int(round(res_height / 2))),
                     cv2.FONT_HERSHEY_PLAIN,
                     1,
                     (255, 255, 255))
