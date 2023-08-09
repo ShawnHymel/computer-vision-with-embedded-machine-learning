@@ -13,14 +13,13 @@ License: Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 
 import os, sys, time
 import cv2
-from picamera import PiCamera
-from picamera.array import PiRGBArray
+from picamera2 import Picamera2
 from edge_impulse_linux.image import ImageImpulseRunner
 
 # Settings
 model_file = "modelfile.eim"             # Trained ML model from Edge Impulse
-res_width = 320                          # Resolution of camera (width)
-res_height = 320                         # Resolution of camera (height)
+cam_width = 320                          # Resolution of camera (width)
+cam_height = 320                         # Resolution of camera (height)
 rotation = 0                            # Camera rotation (0, 90, 180, or 270)
 
 # The ImpulseRunner module will attempt to load files relative to its location,
@@ -48,28 +47,39 @@ except Exception as e:
 # Initial framerate value
 fps = 0
 
-# Start the camera
-with PiCamera() as camera:
+# Interface with camera
+with Picamera2() as camera:
     
     # Configure camera settings
-    camera.resolution = (res_width, res_height)
-    camera.rotation = rotation
-    
-    # Container for our frames
-    raw_capture = PiRGBArray(camera, size=(res_width, res_height))
+    config = camera.create_video_configuration(main={"size": (cam_width, cam_height)})
+    camera.configure(config)
 
-    # Continuously capture frames (this is our while loop)
-    for frame in camera.capture_continuous(raw_capture, 
-                                            format='bgr', 
-                                            use_video_port=True):
+    # Start camera
+    camera.start()
+
+    # Continuously capture frames
+    while True:
                                             
         # Get timestamp for calculating actual framerate
         timestamp = cv2.getTickCount()
         
-        # Get Numpy array that represents the image
-        img = frame.array
+        # Get array that represents the image (in RGB format)
+        img = camera.capture_array()
+
+        # Rotate image
+        if rotation == 0:
+            pass
+        elif rotation == 90:
+            img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+        elif rotation == 180:
+            img = cv2.rotate(img, cv2.ROTATE_180)
+        elif rotation == 270:
+            img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        else:
+            print("ERROR: rotation not supported. Must be 0, 90, 180, or 270.")
+            break
         
-        # Convert to RGB and encapsulate raw values into array for model input
+        # Convert image to RGB and extract features (e.g. crop)
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         features, cropped = runner.get_features_from_image(img_rgb)
         
@@ -83,6 +93,9 @@ with PiCamera() as camera:
             
         # Display predictions and timing data
         print("Output:", res)
+
+        # For viewing, convert image to BGR (as that's what OpenCV uses)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         
         # Go through each of the returned bounding boxes
         bboxes = res['result']['bounding_boxes']
@@ -119,9 +132,6 @@ with PiCamera() as camera:
         
         # Show the frame
         cv2.imshow("Frame", img)
-        
-        # Clear the stream to prepare for next frame
-        raw_capture.truncate(0)
         
         # Calculate framrate
         frame_time = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()
