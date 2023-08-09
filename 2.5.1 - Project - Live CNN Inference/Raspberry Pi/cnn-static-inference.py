@@ -11,13 +11,12 @@ Copy one of the test images to the same folder, rename image_file as necessary
 
 Author: EdgeImpulse, Inc.
 Date: August 3, 2021
+Updated: August 9, 2023
 License: Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 """
 
 import os, sys, time
 import cv2
-from picamera import PiCamera
-from picamera.array import PiRGBArray
 from edge_impulse_linux.image import ImageImpulseRunner
 
 # Settings

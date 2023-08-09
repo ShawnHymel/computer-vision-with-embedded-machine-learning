@@ -7,14 +7,14 @@ inference using provided .eim model file. Outputs probabilities in console.
 
 Author: EdgeImpulse, Inc.
 Date: June 8, 2021
+Updated: August 9, 2023
 License: Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 """
 
 import os, sys, time
 import cv2
 import numpy as np
-from picamera import PiCamera
-from picamera.array import PiRGBArray
+from picamera2 import Picamera2
 from edge_impulse_linux.runner import ImpulseRunner
 
 # Settings
@@ -53,32 +53,44 @@ except Exception as e:
 # Initial framerate value
 fps = 0
 
-# Start the camera
-with PiCamera() as camera:
+# Interface with camera
+with Picamera2() as camera:
+
     
     # Configure camera settings
-    camera.resolution = (res_width, res_height)
-    camera.rotation = rotation
+    config = camera.create_video_configuration(main={"size": (res_width, res_height)})
+    camera.configure(config)
+
+    # Start camera
+    camera.start()
     
-    # Container for our frames
-    raw_capture = PiRGBArray(camera, size=(res_width, res_height))
-    
-    # Continuously capture frames (this is our while loop)
-    for frame in camera.capture_continuous(raw_capture, 
-                                            format='bgr', 
-                                            use_video_port=True):
+    # Continuously capture frames
+    while True:
                                             
         # Get timestamp for calculating actual framerate
         timestamp = cv2.getTickCount()
         
-        # Get Numpy array that represents the image
-        img = frame.array
+        # Get array that represents the image
+        img = camera.capture_array()
+
+        # Rotate image
+        if rotation == 0:
+            pass
+        elif rotation == 90:
+            img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+        elif rotation == 180:
+            img = cv2.rotate(img, cv2.ROTATE_180)
+        elif rotation == 270:
+            img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        else:
+            print("ERROR: rotation not supported. Must be 0, 90, 180, or 270.")
+            break
+
+        # Convert image to grayscale
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         
         # Resize captured image
         img_resize = cv2.resize(img, (img_width, img_height))
-        
-        # Convert image to grayscale
-        img_resize = cv2.cvtColor(img_resize, cv2.COLOR_BGR2GRAY)
         
         # Convert image to 1D vector of floating point numbers
         features = np.reshape(img_resize, (img_width * img_height)) / 255
@@ -136,9 +148,6 @@ with PiCamera() as camera:
         
         # Show the frame
         cv2.imshow("Frame", img)
-        
-        # Clear the stream to prepare for next frame
-        raw_capture.truncate(0)
         
         # Calculate framrate
         frame_time = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()

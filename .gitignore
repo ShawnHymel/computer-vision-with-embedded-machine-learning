@@ -125,3 +125,6 @@ ctrlp.root
 
 # STM32CubeIDE garbage
 .metadata/
+
+# macOS stuff
+.DS_Store
