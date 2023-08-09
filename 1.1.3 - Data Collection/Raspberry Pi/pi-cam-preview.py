@@ -11,41 +11,55 @@ https://www.pyimagesearch.com/2015/03/30/accessing-the-raspberry-pi-camera-with-
 
 Author: EdgeImpulse, Inc.
 Date: July 5, 2021
+Updated: August 9, 2023
 License: Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 """
 
 import cv2
-from picamera import PiCamera
-from picamera.array import PiRGBArray
+from picamera2 import Picamera2
 
 # Settings
 res_width = 320                         # Resolution of camera (width)
 res_height = 320                        # Resolution of camera (height)
-rotation = 0                            # Camera rotation (0, 90, 180, or 270)
+rotation = 0                            # Image rotation (0, 90, 180, or 270)
 
 # Initial framerate value
 fps = 0
 
-# Start the camera
-with PiCamera() as camera:
+# Interface with camera
+with Picamera2() as camera:
 
     # Configure camera settings
-    camera.resolution = (res_width, res_height)
-    camera.rotation = rotation
-    
-    # Container for our frames
-    raw_capture = PiRGBArray(camera, size=(res_width, res_height))
+    config = camera.create_video_configuration(main={"size": (res_width, res_height)})
+    camera.configure(config)
 
-    # Continuously capture frames (this is our while loop)
-    for frame in camera.capture_continuous(raw_capture, 
-                                            format='bgr', 
-                                            use_video_port=True):
+    # Start camera
+    camera.start()
+
+    # Continuously capture frames
+    while True:
                                             
         # Get timestamp for calculating actual framerate
         timestamp = cv2.getTickCount()
         
-        # Get Numpy array that represents the image
-        img = frame.array
+        # Get array that represents the image
+        img = camera.capture_array()
+        
+        # Rotate image
+        if rotation == 0:
+            pass
+        elif rotation == 90:
+            img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+        elif rotation == 180:
+            img = cv2.rotate(img, cv2.ROTATE_180)
+        elif rotation == 270:
+            img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        else:
+            print("ERROR: rotation not supported. Must be 0, 90, 180, or 270.")
+            break
+
+        # Fix colors (as OpenCV works in BGR format)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         
         # Draw framerate on frame
         cv2.putText(img, 
@@ -57,9 +71,6 @@ with PiCamera() as camera:
         
         # Show the frame
         cv2.imshow("Frame", img)
-        
-        # Clear the stream to prepare for next frame
-        raw_capture.truncate(0)
         
         # Calculate framrate
         frame_time = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()

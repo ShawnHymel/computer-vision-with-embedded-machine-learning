@@ -7,12 +7,12 @@ to take multiple photos.
 
 Author: EdgeImpulse, Inc.
 Date: July 6, 2021
+Updated: August 9, 2023
 License: Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 """
 
 import cv2
-from picamera import PiCamera
-from picamera.array import PiRGBArray
+from picamera2 import Picamera2
 
 # Settings
 res_width = 96                          # Resolution of camera (width)
@@ -65,29 +65,43 @@ def get_filepath():
 # Figure out the name of the output image filename
 filepath = get_filepath()
 
-# Start the camera
-with PiCamera() as camera:
+# Interface with camera
+with Picamera2() as camera:
 
     # Configure camera settings
-    camera.resolution = (res_width, res_height)
-    camera.rotation = rotation
-    
-    # Container for our frames
-    raw_capture = PiRGBArray(camera, size=(res_width, res_height))
+    config = camera.create_video_configuration(main={"size": (res_width, res_height)})
+    camera.configure(config)
+
+    # Start camera
+    camera.start()
     
     # Initial countdown timestamp
     countdown_timestamp = cv2.getTickCount()
 
-    # Continuously capture frames (this is our while loop)
-    for frame in camera.capture_continuous(raw_capture, 
-                                            format='bgr', 
-                                            use_video_port=True):
+    # Continuously capture frames
+    while True:
                                             
         # Get timestamp for calculating actual framerate
         timestamp = cv2.getTickCount()
         
-        # Get Numpy array that represents the image
-        img = frame.array
+        # Get array that represents the image
+        img = camera.capture_array()
+        
+        # Rotate image
+        if rotation == 0:
+            pass
+        elif rotation == 90:
+            img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+        elif rotation == 180:
+            img = cv2.rotate(img, cv2.ROTATE_180)
+        elif rotation == 270:
+            img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        else:
+            print("ERROR: rotation not supported. Must be 0, 90, 180, or 270.")
+            break
+
+        # Fix colors (as OpenCV works in BGR format)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
        
         # Each second, decrement countdown
         if (timestamp - countdown_timestamp) / cv2.getTickFrequency() > 1.0:
@@ -121,9 +135,6 @@ with PiCamera() as camera:
         # Show the frame
         cv2.imshow("Frame", img)
         
-        # Clear the stream to prepare for next frame
-        raw_capture.truncate(0)
-        
         # Calculate framrate
         frame_time = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()
         fps = 1 / frame_time
@@ -133,7 +144,7 @@ with PiCamera() as camera:
             break
     
     # Capture image
-    camera.capture(filepath)
+    cv2.imwrite(filepath, img)
     print("Image saved to:", filepath)
 
 # Clean up
