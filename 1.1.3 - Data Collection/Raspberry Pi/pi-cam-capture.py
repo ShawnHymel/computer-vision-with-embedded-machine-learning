@@ -18,6 +18,7 @@ from picamera2 import Picamera2
 res_width = 96                          # Resolution of camera (width)
 res_height = 96                         # Resolution of camera (height)
 rotation = 0                            # Camera rotation (0, 90, 180, or 270)
+cam_format = "RGB888"                   # Color format
 draw_fps = False                        # Draw FPS on screen
 save_path = "./"                        # Save images to current directory
 file_num = 0                            # Starting point for filename
@@ -69,7 +70,8 @@ filepath = get_filepath()
 with Picamera2() as camera:
 
     # Configure camera settings
-    config = camera.create_video_configuration(main={"size": (res_width, res_height)})
+    config = camera.create_video_configuration(
+        main={"size": (res_width, res_height), "format": cam_format})
     camera.configure(config)
 
     # Start camera

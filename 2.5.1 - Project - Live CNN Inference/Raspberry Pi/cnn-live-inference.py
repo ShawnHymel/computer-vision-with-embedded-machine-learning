@@ -22,6 +22,7 @@ model_file = "modelfile.eim"             # Trained ML model from Edge Impulse
 res_width = 96                          # Resolution of camera (width)
 res_height = 96                         # Resolution of camera (height)
 rotation = 0                            # Camera rotation (0, 90, 180, or 270)
+cam_format = "RGB888"                   # Color format
 
 # The ImpulseRunner module will attempt to load files relative to its location,
 # so we make it load files relative to this program instead
@@ -53,7 +54,8 @@ with Picamera2() as camera:
 
     
     # Configure camera settings
-    config = camera.create_video_configuration(main={"size": (res_width, res_height)})
+    config = camera.create_video_configuration(
+        main={"size": (res_width, res_height), "format": cam_format})
     camera.configure(config)
 
     # Start camera

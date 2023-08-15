@@ -22,6 +22,7 @@ target_threshold = 0.6                  # Draw box if output prob. >= this value
 cam_width = 320                         # Width of frame (pixels)
 cam_height = 240                        # Height of frame (pixels)
 rotation = 0                            # Camera rotation (0, 90, 180, or 270)
+cam_format = "RGB888"                   # Color format
 window_width = 96                       # Window width (input to CNN)
 window_height = 96                      # Window height (input to CNN)
 stride = 24                             # How many pixels to move the window
@@ -61,7 +62,8 @@ fps = 0
 with Picamera2() as camera:
 
     # Configure camera settings
-    config = camera.create_video_configuration(main={"size": (cam_width, cam_height)})
+    config = camera.create_video_configuration(
+        main={"size": (cam_width, cam_height), "format": cam_format})
     camera.configure(config)
 
     # Start camera

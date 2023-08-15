@@ -22,6 +22,7 @@ from picamera2 import Picamera2
 res_width = 320                         # Resolution of camera (width)
 res_height = 320                        # Resolution of camera (height)
 rotation = 0                            # Image rotation (0, 90, 180, or 270)
+cam_format = "RGB888"                   # Color format
 
 # Initial framerate value
 fps = 0
@@ -30,7 +31,8 @@ fps = 0
 with Picamera2() as camera:
 
     # Configure camera settings
-    config = camera.create_video_configuration(main={"size": (res_width, res_height)})
+    config = camera.create_video_configuration(
+        main={"size": (res_width, res_height), "format": cam_format})
     camera.configure(config)
 
     # Start camera
