@@ -13,10 +13,12 @@ License: Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 
 import cv2
 from picamera2 import Picamera2
+import time
 
 # Settings
 res_width = 96                          # Resolution of camera (width)
 res_height = 96                         # Resolution of camera (height)
+target_fps = 15                         # Target FPS
 rotation = 0                            # Camera rotation (0, 90, 180, or 270)
 cam_format = "RGB888"                   # Color format
 draw_fps = False                        # Draw FPS on screen
@@ -25,6 +27,9 @@ file_num = 0                            # Starting point for filename
 file_suffix = ".png"                    # Extension for image file
 precountdown = 2                        # Seconds before starting countdown
 countdown = 5                           # Seconds to count down from
+
+# Computed settings
+frame_interval = 1.0 / target_fps
 
 # Initial framerate value
 fps = 0
@@ -141,9 +146,17 @@ with Picamera2() as camera:
         frame_time = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()
         fps = 1 / frame_time
         
-        # Press 'q' to quit
-        if cv2.waitKey(1) == ord('q'):
+        # Calculate sleep time FIRST
+        elapsed = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()
+        sleep_time = frame_interval - elapsed
+        
+        # Quit if 'q' is pressed
+        if cv2.waitKey(max(1, int(sleep_time * 1000))) == ord('q'):
             break
+
+        # Then sleep the remainder
+        if sleep_time > 0:
+            time.sleep(sleep_time)
     
     # Capture image
     cv2.imwrite(filepath, img)
