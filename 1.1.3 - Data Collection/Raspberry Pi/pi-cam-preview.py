@@ -23,6 +23,10 @@ res_width = 320                         # Resolution of camera (width)
 res_height = 320                        # Resolution of camera (height)
 rotation = 0                            # Image rotation (0, 90, 180, or 270)
 cam_format = "RGB888"                   # Color format
+target_fps = 15                         # Target FPS
+
+# Computed settings
+frame_interval = 1.0 / target_fps
 
 # Initial framerate value
 fps = 0
@@ -71,16 +75,19 @@ with Picamera2() as camera:
                     1,
                     (255, 255, 255))
         
-        # Show the frame
-        cv2.imshow("Frame", img)
-        
-        # Calculate framrate
+        # Calculate framerate and sleep time
         frame_time = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()
         fps = 1 / frame_time
-        
+        elapsed = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()
+        sleep_time = frame_interval - elapsed
+
         # Press 'q' to quit
-        if cv2.waitKey(1) == ord('q'):
+        if cv2.waitKey(max(1, int(sleep_time * 1000))) == ord('q'):
             break
+
+        # Sleep remaining frame time
+        if sleep_time > 0:
+            time.sleep(sleep_time)
             
 # Clean up
 cv2.destroyAllWindows()
