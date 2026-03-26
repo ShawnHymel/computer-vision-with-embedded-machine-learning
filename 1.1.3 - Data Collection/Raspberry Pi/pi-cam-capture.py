@@ -146,7 +146,7 @@ with Picamera2() as camera:
         frame_time = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()
         fps = 1 / frame_time
         
-        # Calculate sleep time FIRST
+        # Calculate sleep time
         elapsed = (cv2.getTickCount() - timestamp) / cv2.getTickFrequency()
         sleep_time = frame_interval - elapsed
         
